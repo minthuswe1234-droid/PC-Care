@@ -81,7 +81,7 @@ class MainWindow(QMainWindow):
             self.nav_buttons[label] = button
             nav.addWidget(button)
         nav.addStretch()
-        version = QLabel('Version 0.2.0 • Free')
+        version = QLabel('Version 0.3.0 • Free')
         version.setObjectName('muted')
         nav.addWidget(version)
         outer.addWidget(sidebar)

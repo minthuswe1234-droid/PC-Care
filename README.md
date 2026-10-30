@@ -45,3 +45,9 @@ If you already committed and tagged v0.1.0, keep that history; just commit the c
 ## License
 
 Choose and add an appropriate `LICENSE` file before public distribution. Check dependency license obligations, including PySide6/Qt.
+
+## v0.3 Safe cleanup
+
+Scan the OS-provided user temporary directory. Select individual result rows and click **Recycle Selected**. A confirmation dialog is required. The tool does not permanently delete files. Symlinks, paths outside the temp directory, and files changed since scanning are rejected. Windows Recycle Bin behavior may vary; do not treat this as a backup. Scanning is capped at 200,000 files and displays at most 1,000 samples.
+
+Upgrade from v0.2: retain your `.venv` and run `python -m pip install -r requirements.txt` once to install `send2trash`. Run `python -m unittest discover -s tests -v` before launching.

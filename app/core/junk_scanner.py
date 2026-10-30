@@ -44,7 +44,7 @@ def scan_temp(progress=None, cancelled=None, limit=200_000):
                             total_bytes += size
                             files += 1
                             if len(samples) < 1000:
-                                samples.append((entry.path, size))
+                                samples.append((entry.path, size, entry.stat(follow_symlinks=False).st_mtime_ns))
                             if files >= limit:
                                 stopped = True
                                 break
