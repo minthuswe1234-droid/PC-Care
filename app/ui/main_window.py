@@ -6,6 +6,7 @@ from PySide6.QtWidgets import (
 )
 from app.core.system_info import system_snapshot
 from app.ui.cleaner_page import CleanerPage
+from app.ui.disk_page import DiskPage
 
 STYLE = '''
 QWidget { background: #0d1424; color: #e8eefc; font-family: 'Segoe UI'; font-size: 14px; }
@@ -81,7 +82,7 @@ class MainWindow(QMainWindow):
             self.nav_buttons[label] = button
             nav.addWidget(button)
         nav.addStretch()
-        version = QLabel('Version 0.2.0 • Free')
+        version = QLabel('Version 0.4.0 • Free')
         version.setObjectName('muted')
         nav.addWidget(version)
         outer.addWidget(sidebar)
@@ -118,7 +119,10 @@ class MainWindow(QMainWindow):
         column.addStretch()
         self.pages = QStackedWidget()
         self.pages.addWidget(content)
-        self.pages.addWidget(CleanerPage())
+        self.cleaner_page = CleanerPage()
+        self.disk_page = DiskPage()
+        self.pages.addWidget(self.cleaner_page)
+        self.pages.addWidget(self.disk_page)
         outer.addWidget(self.pages, 1)
 
         psutil_ready = system_snapshot()
@@ -128,10 +132,10 @@ class MainWindow(QMainWindow):
         self.timer.start(2000)
 
     def navigate(self, name):
-        if name not in ('Dashboard', 'Junk Cleaner'):
+        if name not in ('Dashboard', 'Junk Cleaner', 'Disk Analyzer'):
             self.coming_soon(name)
             return
-        self.pages.setCurrentIndex(0 if name == 'Dashboard' else 1)
+        self.pages.setCurrentIndex({'Dashboard': 0, 'Junk Cleaner': 1, 'Disk Analyzer': 2}[name])
         for label, button in self.nav_buttons.items():
             button.setObjectName('active' if label == name else '')
             button.style().unpolish(button)
@@ -149,3 +153,13 @@ class MainWindow(QMainWindow):
             self.device_info.setText(f"Device: {data['device']}    •    OS: {data['os']}")
         except (OSError, ValueError) as exc:
             self.device_info.setText(f'Unable to read system information: {exc}')
+
+    def closeEvent(self, event):
+        if self.disk_page.thread is not None or self.cleaner_page._thread is not None:
+            self.disk_page.cancel_event.set()
+            if self.cleaner_page._busy == 'scan':
+                self.cleaner_page.cancel_scan()
+            event.ignore()
+            QMessageBox.information(self, 'Operation running', 'Please wait for the current operation to finish before closing.')
+            return
+        super().closeEvent(event)
